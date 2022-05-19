@@ -21,23 +21,51 @@ public class Main {
         }
     }
 
-    public static void provjeraGreske(Osoba osoba,String rootRoditelj,Integer rootRoditeljId){
+    public static void krozCijeluListu(List<Osoba> osobaList1){
+        for(int i=0;i<osobaList1.size();i++){
+            testiranje(osobaList1,osobaList1.get(i).getIme(),i);
+            if(osobaList1.get(i).getDjeca()!=null){
+                for(int j=0;j<osobaList.get(i).getDjeca().size();j++){
+                    krozCijeluListu(osobaList1.get(i).getDjeca());
+                }
+            }
+        }
+    }
+
+    public static void testiranje(List<Osoba> osobe,String rootRoditelj,Integer rootRoditeljId){
+        for(int i=0;i<osobe.size();i++){
+            if(rootRoditeljId!=i){
+                    if(osobe.get(i).getIme().equals(rootRoditelj)){
+                        throw new CyclicRelationshipException();
+                    }else if(osobaList.get(i).getDjeca()!=null){
+                        testiranje(osobe.get(i).getDjeca(),rootRoditelj,-1);
+                    }
+            }
+        }
+    }
+
+    public static void provjeraGreske(Osoba osoba,String rootRoditelj){
 
         for (int i=0;i<osoba.getDjeca().size();i++){
-            try {
+            if(osoba.getDjeca()!=null){
+                for (int j=0;j<osoba.getDjeca().size();j++){
+                    provjeraGreske(osoba.getDjeca().get(j),osoba.getDjeca().get(j).getIme());
+                }
+            }
+            //try {
                 if(osoba.getDjeca().get(i).getIme().equals(rootRoditelj)){
                     throw new CyclicRelationshipException();
                 }else {
-                    provjeraGreske(osoba.getDjeca().get(i), rootRoditelj,rootRoditeljId);
+                    provjeraGreske(osoba.getDjeca().get(i), rootRoditelj);
                 }
-            }catch (CyclicRelationshipException e){
-                System.out.println(e.getMessage());
+            //}catch (CyclicRelationshipException e){
+                //System.out.println(e.getMessage());
                 //System.out.println(osoba.getIme());
                 //System.out.println(rootRoditeljId);
                 //System.out.println(osobaList.get(rootRoditeljId).getDjeca().get(0));
 
-                osobaList.set(rootRoditeljId,osobaList.get(rootRoditeljId).getDjeca().get(0));
-            }
+                //osobaList.set(rootRoditeljId,osobaList.get(rootRoditeljId).getDjeca().get(0));
+            //}
         }
 
     }
@@ -55,12 +83,7 @@ public class Main {
                         osobaList.remove(x);
 
                         for(int q=0;q<osobaList.size();q++){
-                            provjeraGreske(osobaList.get(q),osobaList.get(q).getIme(),q);
-                            if(osobaList.get(q).getDjeca()!=null){
-                                for(int z=0;z<osobaList.get(q).getDjeca().size();z++){
-
-                                }
-                            }
+                            provjeraGreske(osobaList.get(q),osobaList.get(q).getIme());
                         }
                     }
                 }
@@ -71,7 +94,7 @@ public class Main {
     public static void izradaListe(String[] polje){
         String roditeljIme=polje[1];
         String djeteIme=polje[0];
-        Boolean postojiRoditelj=false;
+        boolean postojiRoditelj=false;
 
         for (Osoba osoba : osobaList) {
             if (osoba.getIme().equals(roditeljIme)) {
@@ -132,6 +155,8 @@ public class Main {
             izradaListe(imena.get(i).split("\\s+"));
         }
         provjera();
+        krozCijeluListu(osobaList);
+
         ispis(osobaList,0);
     }
 }
